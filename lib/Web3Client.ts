@@ -341,7 +341,8 @@ export const lend = async (contract_: string, tokenId: number, payment: string, 
 export const rent = async (contract_: string, tokenId: number, amount: number) => {
     return new Promise(function (res, rej) {
         try {
-            rentFunContract.rent(contract_, tokenId, amount, overrides).then(async function (transaction: any) {
+            // @ts-ignore
+            rentFunContract.rent(contract_, tokenId, amount, {...overrides, value: amount*ethers.BigNumber.from(1e15)}).then(async function (transaction: any) {
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
