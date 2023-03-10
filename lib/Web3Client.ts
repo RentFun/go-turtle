@@ -279,6 +279,7 @@ export const setUnitTime = async () => {
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
+                    // @ts-ignore
                     transactionReceipt = await provider.getTransactionReceipt(
                         transaction.hash
                     );
@@ -299,6 +300,7 @@ export const approve = async (tokenId: number) => {
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
+                    // @ts-ignore
                     transactionReceipt = await provider.getTransactionReceipt(
                         transaction.hash
                     );
@@ -325,6 +327,7 @@ export const lend = async (contract_: string, tokenId: number, payment: string, 
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
+                    // @ts-ignore
                     transactionReceipt = await provider.getTransactionReceipt(
                         transaction.hash
                     );
@@ -346,6 +349,7 @@ export const rent = async (contract_: string, tokenId: number, amount: number) =
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
+                    // @ts-ignore
                     transactionReceipt = await provider.getTransactionReceipt(
                         transaction.hash
                     );
@@ -366,6 +370,7 @@ export const cancelLend = async (contract_: string, tokenId: number) => {
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
+                    // @ts-ignore
                     transactionReceipt = await provider.getTransactionReceipt(
                         transaction.hash
                     );
@@ -383,7 +388,7 @@ export const IsApproved = async (tokenId: number, operator: string) => {
     getApproved(tokenId).then((res) => {
         return res === operator;
     });
-}
+};
 
 export const getApproved = async (tokenId: number) => {
     return new Promise(function (res) {
@@ -420,10 +425,6 @@ export const tokenOwner = async (tokenId: number) => {
         }
     });
 };
-
-
-
-// function lend(address contract_, uint256 tokenId, address payment, uint256 unitFee)
 
 const sleep = (milliseconds: number | undefined) => {
     return new Promise((resolve) => setTimeout(resolve, milliseconds));
