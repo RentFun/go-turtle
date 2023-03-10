@@ -7,7 +7,7 @@ const RentFunAddress = RentFunData.address;
 const RentFunABI = RentFunData.abi;
 const OwnerVaultABI = OwnerVaultData.abi;
 
-const TurtisAddress = TurtisData.address;
+export const TurtisAddress = TurtisData.address;
 const TurtisABI = TurtisData.abi;
 
 let rentFunContract: ethers.Contract;
@@ -26,7 +26,7 @@ export const init = async () => {
     //@ts-ignore
     provider = new ethers.providers.Web3Provider(window.ethereum, "any");
     provider.on("network", (oldNetwork) => {
-        console.log(oldNetwork.chainId);
+        // console.log(oldNetwork.chainId);
         if (oldNetwork.chainId != 421613) {
             //@ts-ignore
             window.ethereum
@@ -91,32 +91,32 @@ export const getAliveRentals = async () => {
     });
 };
 
-export const getUserListed = async () => {
-    let tds = await getAllTokenDetails(TurtisAddress);
-    tds = tds.filter(td => td.depositor === currentUser && (td.rentStatus == 1 || td.rentStatus == 2) && td.endTime < TimeAsSeconds());
+export const getUserListed = async (contract: string) => {
+    let tds = await getAllTokenDetails(contract);
+    tds = tds.filter(td => td.depositor === currentUser && (td.rentStatus == 1 || td.rentStatus == 2));
     return await getMetadatas(ListType.MyListed, tds);
 };
 
-export const getOtherListed = async () => {
-    let tds = await getAllTokenDetails(TurtisAddress);
-    tds = tds.filter(td => td.depositor !== currentUser && (td.rentStatus == 1 || td.rentStatus == 2) && td.endTime < TimeAsSeconds());
+export const getOtherListed = async (contract: string) => {
+    let tds = await getAllTokenDetails(contract);
+    tds = tds.filter(td => td.depositor !== currentUser && (td.rentStatus == 1 || td.rentStatus == 2));
     return await getMetadatas(ListType.OtherListed, tds);
 };
 
-export const getOtherRentals = async () => {
-    let rentals = await getOtherRentalsFromRentFun(TurtisAddress);
+export const getOtherRentals = async (contract: string) => {
+    let rentals = await getOtherRentalsFromRentFun(contract);
     rentals = rentals.filter(r => r.renter !== currentUser &&  r.endTime >= TimeAsSeconds());
     return await getMetadatas(ListType.OtherRental, rentals);
 };
 
-export const getDeListed = async () => {
-    let tds = await getAllTokenDetails(TurtisAddress);
+export const getDeListed = async (contract: string) => {
+    let tds = await getAllTokenDetails(contract);
     tds = tds.filter( td => td.rentStatus == 3 &&
         td.endTime < TimeAsSeconds());
 
     let details: TokenDetail[] = [];
     for (let i=0; i < tds.length; i++) {
-        if (!tds[i].tokenId || tds[i].rentStatus != 3 || tds[i].endTime >= TimeAsSeconds()) {
+        if (!tds[i].tokenId || tds[i].rentStatus != 3) {
             continue
         }
 
@@ -140,13 +140,15 @@ export const getAllTokenDetails = async (contract: string) => {
     for(let i=1; i < nextTokenIdx; i++) {
         let td = await getTokenDetails(i);
 
-        // @ts-ignore
-        if (!td || td.contract_ != contract) {
+        if (!td) {
             console.log("getTokenDetails error");
             continue
         }
 
-        details.push(td as TokenDetail);
+        // @ts-ignore
+        if (td.contract_ === contract) {
+            details.push(td as TokenDetail);
+        }
     }
 
     return details;
@@ -164,12 +166,15 @@ export const getOtherRentalsFromRentFun = async (contract: string) => {
         let rental = await getRentalByIndex(i);
 
         // @ts-ignore
-        if (!rental || rental.contract_ != contract) {
+        if (!rental) {
             console.log("getOtherRentalsFromRentFun error");
             continue
         }
 
-        rentals.push(rental as Rental);
+        // @ts-ignore
+        if (rental.contract_ === contract) {
+            rentals.push(rental as Rental);
+        }
     }
 
     return rentals;
@@ -190,16 +195,11 @@ export const getMetadatas = async (listType: ListType, tokens: any) => {
                 metadata.image = metadata.image.replace(FileHead, dedicatedGateway);
 
 
-                let endTime = item.endTime;
-                if (listType === ListType.MyRental || listType === ListType.OtherRental) {
-                    endTime = item.endTime - TimeAsSeconds();
+                let endTime = item.endTime - TimeAsSeconds();
+                if (endTime < 0) {
+                    endTime = 0;
                 }
-
                 const result = {...item, tokenURI: tokenURI, metadata: metadata, endTime: endTime};
-
-                if (listType === ListType.MyListed) {
-                    console.log(listType, result);
-                }
                 return result;
             });
 

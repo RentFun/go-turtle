@@ -1,14 +1,24 @@
-import { useState, useEffect, useCallback } from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import Card from '@/components/card';
-import { init, getUserOwnedNFTs, getAliveRentals, getUserListed,
-    getOtherListed, getOtherRentals, getDeListed, ListType } from "@/lib/Web3Client";
+import {
+    getAliveRentals,
+    getDeListed,
+    getOtherListed,
+    getOtherRentals,
+    getUserListed,
+    getUserOwnedNFTs,
+    init,
+    TurtisAddress,
+} from "@/lib/Web3Client";
 import Container from 'react-bootstrap/Container';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import {ListType} from "../lib/Web3Client";
 
 const List = () => {
+    const [key, setKey] = useState(ListType.Mine.toString());
     const [mine, setMine] = useState([]);
     const [myRentals, setMyRentals] = useState([]);
     const [myListed, setMyListed] = useState([]);
@@ -19,7 +29,6 @@ const List = () => {
 
     const OperatedCB = useCallback(
         async () => {
-            console.log("OperatedCB");
             setOperated(!operated);
         },
         []
@@ -28,18 +37,27 @@ const List = () => {
     useEffect(() => {
         const getNFTs = async () => {
             await init();
-            // @ts-ignore
-            setMine(await getUserOwnedNFTs());
-            // @ts-ignore
-            setMyRentals(await getAliveRentals());
-            // @ts-ignore
-            setMyListed(await getUserListed());
-            // @ts-ignore
-            setOtherListed(await getOtherListed());
-            // @ts-ignore
-            setOtherRentals(await  getOtherRentals());
-            // @ts-ignore
-            setDelisted(await getDeListed());
+
+            switch (key) {
+                case ListType.Mine:
+                    // @ts-ignore
+                    setMine(await getUserOwnedNFTs());
+                case ListType.MyRental:
+                    // @ts-ignore
+                    setMyRentals(await getAliveRentals());
+                case ListType.MyListed:
+                    // @ts-ignore
+                    setMyListed(await getUserListed(TurtisAddress));
+                case ListType.OtherListed:
+                    // @ts-ignore
+                    setOtherListed(await getOtherListed(TurtisAddress));
+                case ListType.OtherRental:
+                    // @ts-ignore
+                    setOtherRentals(await  getOtherRentals(TurtisAddress));
+                case ListType.Delisted:
+                    // @ts-ignore
+                    setDelisted(await getDeListed(TurtisAddress));
+            }
         };
 
         getNFTs();
@@ -47,7 +65,7 @@ const List = () => {
         window.ethereum.on("accountsChanged", function (accounts) {
             getNFTs();
         });
-    }, [operated]);
+    }, [operated, key]);
 
     const RowsAndCols = (cards: any[]) => {
         let allRows = [];
@@ -103,7 +121,7 @@ const List = () => {
     return (
         <>
             <Container>
-                <Tabs defaultActiveKey={ListType.Mine} id="cards" className="mb-5">
+                <Tabs activeKey={key} onSelect={(k) => setKey(k)} id="cards" className="mb-5">
                     <Tab eventKey={ListType.Mine} title={ListType.Mine}>
                         {RowsAndCols(myCards)}
                     </Tab>

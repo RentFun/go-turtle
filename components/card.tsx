@@ -10,12 +10,25 @@ function UserNftCard({ turtle, listType, cb }: { turtle: IUserNftWithMetadata, l
             case ListType.MyRental:
                 return <><Card.Text>LeftSeconds: {turtle.endTime}</Card.Text><Button href='http://game.rentfun.io' target='_blank'>Play Game</Button></>
             case ListType.MyListed:
+                if (turtle.endTime > 0) {
+                    return <><Card.Text>LeftSeconds: {turtle.endTime}</Card.Text>
+                        <Button variant="primary" onClick={async () => {cancelLend(turtle.contract_, turtle.tokenId).then(() => {cb()})}}>Delist</Button></>
+                }
+
                 return <Button variant="primary" onClick={async () => {cancelLend(turtle.contract_, turtle.tokenId).then(() => {cb()})}}>Delist</Button>;
             case ListType.OtherListed:
+                if (turtle.endTime > 0) {
+                    return <Card.Text>LeftSeconds: {turtle.endTime}</Card.Text>
+                }
+
                 return <Button variant="primary" onClick={async () => {rent(turtle.contract_, turtle.tokenId, 1).then(() => {cb()})}}>Rent</Button>;
             case ListType.OtherRental:
                 return <Card.Text>LeftSeconds: {turtle.endTime}</Card.Text>
             case ListType.Delisted:
+                if (turtle.endTime > 0) {
+                    return <Card.Text>LeftSeconds: {turtle.endTime}</Card.Text>
+                }
+
                 return <Button variant="primary" onClick={async () => {transferOut(turtle.vault, turtle.contract_, turtle.tokenId).then(() => {cb()})}}>Transfer Out</Button>;
         }
     };
