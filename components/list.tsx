@@ -118,10 +118,15 @@ const List = () => {
         <Card turtle={nft} listType={ListType.Delisted} cb={OperatedCB} key={nft.tokenId.toString()} />
     ));
 
+    const selectEvent = (k: string | null) => {
+        if (!k) return;
+        setKey(k);
+    };
+
     return (
         <>
             <Container>
-                <Tabs activeKey={key} onSelect={(k) => setKey(k)} id="cards" className="mb-5">
+                <Tabs activeKey={key} onSelect={(k) => selectEvent(k)} id="cards" className="mb-5">
                     <Tab eventKey={ListType.Mine} title={ListType.Mine}>
                         {RowsAndCols(myCards)}
                     </Tab>
