@@ -71,6 +71,7 @@ const List = () => {
             // @ts-ignore
             oneRow.push(<Col></Col>);
         }
+        // @ts-ignore
         allRows.push(<Row>{oneRow}</Row>);
         return allRows;
     };
