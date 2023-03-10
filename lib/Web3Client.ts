@@ -140,6 +140,7 @@ export const getAllTokenDetails = async (contract: string) => {
     for(let i=1; i < nextTokenIdx; i++) {
         let td = await getTokenDetails(i);
 
+        // @ts-ignore
         if (!td || td.contract_ != contract) {
             console.log("getTokenDetails error");
             continue
@@ -162,6 +163,7 @@ export const getOtherRentalsFromRentFun = async (contract: string) => {
     for(let i=1; i <= totalRentalCount; i++) {
         let rental = await getRentalByIndex(i);
 
+        // @ts-ignore
         if (!rental || rental.contract_ != contract) {
             console.log("getOtherRentalsFromRentFun error");
             continue
@@ -178,8 +180,11 @@ export const getMetadatas = async (listType: ListType, tokens: any) => {
         try {
             const datas = tokens.map(async (item: any) => {
                 let tokenURI = await getTokenUrlById(item.tokenId);
+
+                // @ts-ignore
                 tokenURI = tokenURI.replace(FileHead, dedicatedGateway);
                 let metadata = await (
+                    // @ts-ignore
                     await fetch(tokenURI)
                 ).json();
                 metadata.image = metadata.image.replace(FileHead, dedicatedGateway);
@@ -287,10 +292,10 @@ export const setUnitTime = async () => {
     });
 };
 
-export const approve = async () => {
+export const approve = async (tokenId: number) => {
     return new Promise(function (res, rej) {
         try {
-            turtisContract.setApprovalForAll(RentFunAddress, true, overrides).then(async function (transaction: any) {
+            turtisContract.approve(RentFunAddress, tokenId, overrides).then(async function (transaction: any) {
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
@@ -307,15 +312,16 @@ export const approve = async () => {
     });
 };
 
-export const lend = async () => {
-    const isApproved = await isApprovedForAll(currentUser, RentFunAddress);
-    if (!isApproved) {
-        await approve();
+export const lend = async (contract_: string, tokenId: number, payment: string, unitFee: number) => {
+    const approved = await IsApproved(tokenId, RentFunAddress);
+    // @ts-ignore
+    if (!approved) {
+        await approve(tokenId);
     }
 
     return new Promise(function (res, rej) {
         try {
-            rentFunContract.lend(TurtisAddress, 0,  '0x0000000000000000000000000000000000000000', 0, overrides).then(async function (transaction: any) {
+            rentFunContract.lend(TurtisAddress, tokenId,  payment, unitFee, overrides).then(async function (transaction: any) {
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
@@ -332,10 +338,10 @@ export const lend = async () => {
     });
 };
 
-export const rent = async () => {
+export const rent = async (contract_: string, tokenId: number, amount: number) => {
     return new Promise(function (res, rej) {
         try {
-            rentFunContract.rent(TurtisAddress, 0, 1, overrides).then(async function (transaction: any) {
+            rentFunContract.rent(contract_, tokenId, amount, overrides).then(async function (transaction: any) {
                 let transactionReceipt = null;
                 while (transactionReceipt == null) {
                     // Waiting expectedBlockTime until the transaction is mined
@@ -368,6 +374,24 @@ export const cancelLend = async (contract_: string, tokenId: number) => {
             });
         } catch (error) {
             console.log(error);
+        }
+    });
+};
+
+export const IsApproved = async (tokenId: number, operator: string) => {
+    getApproved(tokenId).then((res) => {
+        return res === operator;
+    });
+}
+
+export const getApproved = async (tokenId: number) => {
+    return new Promise(function (res) {
+        try {
+            turtisContract.getApproved(tokenId).then(async function (data: any) {
+                res(data);
+            });
+        } catch (error) {
+            console.log("isApprovedForAllError", error);
         }
     });
 };
@@ -420,4 +444,6 @@ export enum ListType {
 
 const TimeAsSeconds = () => {
     return Math.floor(Date.now() / 1000)
-}
+};
+
+export const zeroAddress = '0x0000000000000000000000000000000000000000';

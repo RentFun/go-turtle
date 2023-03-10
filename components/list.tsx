@@ -28,11 +28,17 @@ const List = () => {
     useEffect(() => {
         const getNFTs = async () => {
             await init();
+            // @ts-ignore
             setMine(await getUserOwnedNFTs());
+            // @ts-ignore
             setMyRentals(await getAliveRentals());
+            // @ts-ignore
             setMyListed(await getUserListed());
+            // @ts-ignore
             setOtherListed(await getOtherListed());
+            // @ts-ignore
             setOtherRentals(await  getOtherRentals());
+            // @ts-ignore
             setDelisted(await getDeListed());
         };
 
