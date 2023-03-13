@@ -8,8 +8,11 @@ import {
     getUserListed,
     getUserOwnedNFTs,
     init,
+    isAuth,
+    getStore,
     TurtisAddress,
 } from "@/lib/Web3Client";
+
 import Container from 'react-bootstrap/Container';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
@@ -17,7 +20,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import {ListType} from "../lib/Web3Client";
 
-const List = () => {
+const TurtleList = () => {
     const [key, setKey] = useState(ListType.Mine.toString());
     const [mine, setMine] = useState([]);
     const [myRentals, setMyRentals] = useState([]);
@@ -26,6 +29,10 @@ const List = () => {
     const [otherRentals, setOtherRentals] = useState([]);
     const [delisted, setDelisted] = useState([]);
     const [operated, setOperated] = useState(false);
+
+    const [hide, setHide] = useState(false);
+    const [auth, setAuth] = useState('');
+    const [wlist, setWlist] = useState([]);
 
     const OperatedCB = useCallback(
         async () => {
@@ -37,6 +44,15 @@ const List = () => {
     useEffect(() => {
         const getNFTs = async () => {
             await init();
+            setAuth(await isAuth());
+            // @ts-ignore
+            setWlist(await getStore());
+
+            // @ts-ignore
+            if (!wlist.includes(auth)) {
+                setHide(true)
+                return;
+            }
 
             switch (key) {
                 case ListType.Mine:
@@ -125,7 +141,7 @@ const List = () => {
 
     return (
         <>
-            <Container>
+            <Container style={{display: hide ? 'none' : 'block' }}>
                 <Tabs activeKey={key} onSelect={(k) => selectEvent(k)} id="cards" className="mb-5">
                     <Tab eventKey={ListType.Mine} title={ListType.Mine}>
                         {RowsAndCols(myCards)}
@@ -155,4 +171,4 @@ const List = () => {
         </>
     );
 };
-export default List;
+export default TurtleList;

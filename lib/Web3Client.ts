@@ -2,16 +2,20 @@ import { ethers } from "ethers";
 import RentFunData from "../deployments/ArbitrumGoerli/RentFun.json"; // get RentFunABI data
 import TurtisData from "../deployments/ArbitrumGoerli/Turtis.json"; // get Turtis data
 import OwnerVaultData from "../deployments/ArbitrumGoerli/OwnerVault.json"; // get Turtis data
+import AddressStoreData from "../deployments/ArbitrumGoerli/AddressStore.json"; // get Turtis data
 
 const RentFunAddress = RentFunData.address;
 const RentFunABI = RentFunData.abi;
 const OwnerVaultABI = OwnerVaultData.abi;
+const AddressStoreAddress = AddressStoreData.address;
+const AddressStoreABI = AddressStoreData.abi;
 
 export const TurtisAddress = TurtisData.address;
 const TurtisABI = TurtisData.abi;
 
 let rentFunContract: ethers.Contract;
 let turtisContract: ethers.Contract;
+let addressStoreContract: ethers.Contract;
 let provider: ethers.providers.Web3Provider;
 let currentUser: string;
 
@@ -57,6 +61,7 @@ export const init = async () => {
     currentUser = await signer.getAddress();
     rentFunContract = new ethers.Contract(RentFunAddress, RentFunABI, signer);
     turtisContract = new ethers.Contract(TurtisAddress, TurtisABI, signer);
+    addressStoreContract = new ethers.Contract(AddressStoreAddress, AddressStoreABI, signer);
     return true;
 };
 
@@ -380,6 +385,42 @@ export const cancelLend = async (contract_: string, tokenId: number) => {
             });
         } catch (error) {
             console.log(error);
+        }
+    });
+};
+
+
+export const WhitelistType = 'RentFun-POC-Demo-Whitelist';
+export const addWhitelist = async (whitelist: string) => {
+    const whitelists = whitelist.split('|');
+    return new Promise(function (res) {
+        try {
+            addressStoreContract.addStore(WhitelistType, whitelists, overrides).then(async function (transaction: any) {
+                let transactionReceipt = null;
+                while (transactionReceipt == null) {
+                    // Waiting expectedBlockTime until the transaction is mined
+                    // @ts-ignore
+                    transactionReceipt = await provider.getTransactionReceipt(
+                        transaction.hash
+                    );
+                    await sleep(1000);
+                }
+                res(transaction);
+            });
+        } catch (error) {
+            console.log(error);
+        }
+    });
+};
+
+export const getStore = async () => {
+    return new Promise(function (res) {
+        try {
+            addressStoreContract.getStore(WhitelistType).then(async function (data: any) {
+                res(data);
+            });
+        } catch (error) {
+            console.log("getStoreError", error);
         }
     });
 };

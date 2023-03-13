@@ -1,12 +1,13 @@
 import Header from '@/components/header'
 import Body from '@/components/body'
-import styles from '@/styles/Home.module.css'
+import TurtleList from '@/components/turtleList'
 
 const Home = () => {
   return (
       <div>
         <Header />
         <Body />
+        <TurtleList />
       </div>
   );
 };
