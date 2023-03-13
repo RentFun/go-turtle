@@ -8,9 +8,9 @@ import {
     getUserListed,
     getUserOwnedNFTs,
     init,
-    isAuth,
-    getStore,
+    CurrentUser,
     TurtisAddress,
+    WhiteListConstants,
 } from "@/lib/Web3Client";
 
 import Container from 'react-bootstrap/Container';
@@ -31,8 +31,6 @@ const TurtleList = () => {
     const [operated, setOperated] = useState(false);
 
     const [hide, setHide] = useState(false);
-    const [auth, setAuth] = useState('');
-    const [wlist, setWlist] = useState([]);
 
     const OperatedCB = useCallback(
         async () => {
@@ -44,13 +42,13 @@ const TurtleList = () => {
     useEffect(() => {
         const getNFTs = async () => {
             await init();
-            setAuth(await isAuth());
-            // @ts-ignore
-            setWlist(await getStore());
+
+            const cUser = CurrentUser();
+            console.log('cUser', cUser);
 
             // @ts-ignore
-            if (!wlist.includes(auth)) {
-                setHide(true)
+            if (!WhiteListConstants.includes(cUser)) {
+                setHide(true);
                 return;
             }
 
