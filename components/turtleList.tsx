@@ -8,9 +8,10 @@ import {
     getUserListed,
     getUserOwnedNFTs,
     init,
+    getStore,
     CurrentUser,
     TurtisAddress,
-    WhiteListConstants,
+    ListType,
 } from "@/lib/Web3Client";
 
 import Container from 'react-bootstrap/Container';
@@ -18,7 +19,7 @@ import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import {ListType} from "../lib/Web3Client";
+import ListGroup from "react-bootstrap/ListGroup";
 
 const TurtleList = () => {
     const [key, setKey] = useState(ListType.Mine.toString());
@@ -30,27 +31,35 @@ const TurtleList = () => {
     const [delisted, setDelisted] = useState([]);
     const [operated, setOperated] = useState(false);
 
-    const [hide, setHide] = useState(false);
+    const [wlist, setWlist] = useState([]);
+    const [cuser, setCuser] = useState('');
 
-    const OperatedCB = useCallback(
-        async () => {
+    const OperatedCB = useCallback(() => {
             setOperated(!operated);
         },
         []
     );
 
     useEffect(() => {
-        const getNFTs = async () => {
+        const getWhitelist = async () => {
             await init();
-
-            const cUser = CurrentUser();
-            console.log('cUser', cUser);
+            setCuser(CurrentUser());
 
             // @ts-ignore
-            if (!WhiteListConstants.includes(cUser)) {
-                setHide(true);
-                return;
-            }
+            setWlist(await getStore());
+        };
+
+        getWhitelist();
+
+        //@ts-ignore
+        window.ethereum.on("accountsChanged", function (accounts) {
+            getWhitelist();
+        });
+    }, []);
+
+    useEffect(() => {
+        const getNFTs = async () => {
+            await init();
 
             switch (key) {
                 case ListType.Mine:
@@ -84,12 +93,14 @@ const TurtleList = () => {
     const RowsAndCols = (cards: any[]) => {
         let allRows = [];
         let oneRow = [];
-        for (let i=0; i < cards.length; i++) {
+        let i = 0;
+        let j = 0;
+        for (; i < cards.length; i++) {
             // @ts-ignore
-            oneRow.push(<Col>{cards[i]}</Col>);
+            oneRow.push(<Col key={i}>{cards[i]}</Col>);
             if (i > 0 && i % 4 == 0) {
                 // @ts-ignore
-                allRows.push(<Row>{oneRow}</Row>);
+                allRows.push(<Row key={j++}>{oneRow}</Row>);
                 oneRow.length = 0;
             }
         }
@@ -99,14 +110,18 @@ const TurtleList = () => {
             return allRows;
         }
         const extra = 5 - left;
-        for (let i=0; i < extra; i++) {
+        for (let k=0; k < extra; k++) {
             // @ts-ignore
-            oneRow.push(<Col></Col>);
+            oneRow.push(<Col key={i+k}></Col>);
         }
         // @ts-ignore
-        allRows.push(<Row>{oneRow}</Row>);
+        allRows.push(<Row key={j}>{oneRow}</Row>);
         return allRows;
     };
+
+    const addresses = wlist.map((data: string) => (
+        <ListGroup.Item key={data}>{data}</ListGroup.Item>
+    ));
 
     const myCards = mine.map((nft: IUserNftWithMetadata) => (
         <Card turtle={nft} listType={ListType.Mine} cb={OperatedCB} key={nft.tokenId.toString()}  />
@@ -137,35 +152,45 @@ const TurtleList = () => {
         setKey(k);
     };
 
+    // @ts-ignore
+    const content = wlist.includes(cuser) ?
+        <Container>
+            <Tabs activeKey={key} onSelect={(k) => selectEvent(k)} id="cards" className="mb-5">
+                <Tab eventKey={ListType.Mine} title={ListType.Mine}>
+                    {RowsAndCols(myCards)}
+                </Tab>
+
+                <Tab eventKey={ListType.MyRental} title={ListType.MyRental}>
+                    {RowsAndCols(myRentalCards)}
+                </Tab>
+
+                <Tab eventKey={ListType.MyListed} title={ListType.MyListed}>
+                    {RowsAndCols(myListedCards)}
+                </Tab>
+
+                <Tab eventKey={ListType.OtherListed} title={ListType.OtherListed}>
+                    {RowsAndCols(otherListedCards)}
+                </Tab>
+
+                <Tab eventKey={ListType.OtherRental} title={ListType.OtherRental}>
+                    {RowsAndCols(otherRentalsCards)}
+                </Tab>
+
+                <Tab eventKey={ListType.Delisted} title={ListType.Delisted}>
+                    {RowsAndCols(delistedCards)}
+                </Tab>
+            </Tabs>
+        </Container> :
+        <Container>
+            <ListGroup>
+                <h2>POC-Demo-Whitelist</h2>
+                {addresses}
+            </ListGroup>
+        </Container>
+
     return (
         <>
-            <Container style={{display: hide ? 'none' : 'block' }}>
-                <Tabs activeKey={key} onSelect={(k) => selectEvent(k)} id="cards" className="mb-5">
-                    <Tab eventKey={ListType.Mine} title={ListType.Mine}>
-                        {RowsAndCols(myCards)}
-                    </Tab>
-
-                    <Tab eventKey={ListType.MyRental} title={ListType.MyRental}>
-                        {RowsAndCols(myRentalCards)}
-                    </Tab>
-
-                    <Tab eventKey={ListType.MyListed} title={ListType.MyListed}>
-                        {RowsAndCols(myListedCards)}
-                    </Tab>
-
-                    <Tab eventKey={ListType.OtherListed} title={ListType.OtherListed}>
-                        {RowsAndCols(otherListedCards)}
-                    </Tab>
-
-                    <Tab eventKey={ListType.OtherRental} title={ListType.OtherRental}>
-                        {RowsAndCols(otherRentalsCards)}
-                    </Tab>
-
-                    <Tab eventKey={ListType.Delisted} title={ListType.Delisted}>
-                        {RowsAndCols(delistedCards)}
-                    </Tab>
-                </Tabs>
-            </Container>
+            {content}
         </>
     );
 };

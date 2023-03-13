@@ -448,6 +448,18 @@ export const getStore = async () => {
     });
 };
 
+export const getOperatorsByType = async () => {
+    return new Promise(function (res) {
+        try {
+            addressStoreContract.getOperators(WhitelistType).then(async function (data: any) {
+                res(data);
+            });
+        } catch (error) {
+            console.log("getStoreError", error);
+        }
+    });
+};
+
 export const IsApproved = async (tokenId: number, operator: string) => {
     getApproved(tokenId).then((res) => {
         return res === operator;
@@ -500,7 +512,7 @@ const sleep = (milliseconds: number | undefined) => {
 
 const overrides = {
     gasLimit: 4300000,
-    gasPrice: ethers.utils.parseUnits('7', 'gwei'),
+    gasPrice: ethers.utils.parseUnits('8', 'gwei'),
 };
 
 export enum ListType {
@@ -517,5 +529,3 @@ const TimeAsSeconds = () => {
 };
 
 export const zeroAddress = '0x0000000000000000000000000000000000000000';
-
-export const WhiteListConstants = ['0x3353b44be83197747eB6a4b3B9d2e391c2A357d5', '0xF0966A8c96cd1e5D64959660F87a8F3e866438FA','0xa5afAbC74d9e40903862d9994e6f5C8c33f9980f','0xC9613c430913164391df5Eab01E34038BFd30293','0x4D5e066A4685e9f29cEDe8F847FBC338F267360E','0x356A1f15dd9633175921fb7b9E8Ca645eC5F75d0','0x6ac33c4ec4fa902c019352104831419533afdb89','0xAFA9E46C8e7A6a0E5290706e6DEb435C82c05255','0x7f010192d9398a1059f6449F1611FD9cc87D70b4','0xCb43B5c0A2b3e2f153a45872B12C43606687425D','0x5BDfd08d3b7C0376A70C2f6423be82F0F06E01F0','0x62B88099f1646C6Fbb42167ebB92971bD3Ba271F','0x5f38BB373dccB91AD9Fd3727C2b9BaF6DF9332D3','0xa7DeBb68F2684074Ec4354B68E36C34AF363Fd57']
