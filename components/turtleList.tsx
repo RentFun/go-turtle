@@ -93,29 +93,39 @@ const TurtleList = () => {
     const RowsAndCols = (cards: any[]) => {
         let allRows = [];
         let oneRow = [];
-        let i = 0;
-        let j = 0;
-        for (; i < cards.length; i++) {
+        let k = 0;
+        cards.map((card, i) => {
+            k = i +1;
             // @ts-ignore
-            oneRow.push(<Col key={i}>{cards[i]}</Col>);
-            if (i > 0 && i % 4 == 0) {
-                // @ts-ignore
-                allRows.push(<Row key={j++}>{oneRow}</Row>);
+            oneRow.push(<Col>{card}</Col>);
+            if (k > 1 && k % 5 === 0) {
+                if (k === 5) {
+                    // @ts-ignore
+                    allRows.push(<Row>{[...oneRow]}</Row>);
+                } else {
+                    // @ts-ignore
+                    allRows.push(<Row style={{marginTop: '10rem'}}>{[...oneRow]}</Row>);
+                }
                 oneRow.length = 0;
+            }
+        });
+
+        if (k % 5 != 0) {
+            const extra = 5 - k % 5;
+            for (let m=0; m < extra; m++) {
+                // @ts-ignore
+                oneRow.push(<Col></Col>);
+            }
+
+            if (k === 5) {
+                // @ts-ignore
+                allRows.push(<Row>{[...oneRow]}</Row>);
+            } else {
+                // @ts-ignore
+                allRows.push(<Row style={{marginTop: '10rem'}}>{[...oneRow]}</Row>);
             }
         }
 
-        const left = cards.length % 5;
-        if (left == 0) {
-            return allRows;
-        }
-        const extra = 5 - left;
-        for (let k=0; k < extra; k++) {
-            // @ts-ignore
-            oneRow.push(<Col key={i+k}></Col>);
-        }
-        // @ts-ignore
-        allRows.push(<Row key={j}>{oneRow}</Row>);
         return allRows;
     };
 

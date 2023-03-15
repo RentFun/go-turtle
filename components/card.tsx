@@ -37,7 +37,7 @@ function UserNftCard({ turtle, listType, cb }: { turtle: IUserNftWithMetadata, l
 
 
     return (
-        <Card style={{ width: '12rem', height: '12rem' }}>
+        <Card style={{ width: '10rem', height: '10rem' }}>
             <Card.Img variant="top" src={turtle.metadata.image} />
             <Card.Body>
                 <Card.Title>Name: {turtle.metadata.name + "-" + turtle.tokenId.toString()}</Card.Title>
