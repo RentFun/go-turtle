@@ -117,7 +117,7 @@ const TurtleList = () => {
                 oneRow.push(<Col></Col>);
             }
 
-            if (k === 5) {
+            if (k <= 5) {
                 // @ts-ignore
                 allRows.push(<Row>{[...oneRow]}</Row>);
             } else {
