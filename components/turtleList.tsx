@@ -163,7 +163,7 @@ const TurtleList = () => {
     };
 
     // @ts-ignore
-    const content = wlist.includes(cuser) ?
+    const content =
         <Container>
             <Tabs activeKey={key} onSelect={(k) => selectEvent(k)} id="cards" className="mb-5">
                 <Tab eventKey={ListType.Mine} title={ListType.Mine}>
@@ -190,13 +190,14 @@ const TurtleList = () => {
                     {RowsAndCols(delistedCards)}
                 </Tab>
             </Tabs>
-        </Container> :
-        <Container>
-            <ListGroup>
-                <h2>POC-Demo-Whitelist</h2>
-                {addresses}
-            </ListGroup>
         </Container>
+        //
+        // <Container>
+        //     <ListGroup>
+        //         <h2>POC-Demo-Whitelist</h2>
+        //         {addresses}
+        //     </ListGroup>
+        // </Container>
 
     return (
         <>
