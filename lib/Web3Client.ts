@@ -20,7 +20,7 @@ let provider: ethers.providers.Web3Provider;
 let currentUser: string;
 
 export const FileHead = "ipfs://";
-export const dedicatedGateway = process.env.NEXT_PUBLIC_DEDICATED_GATEWAY as string;
+export const dedicatedGateway = 'https://ipfs.io/ipfs/';
 
 /**
  * * for init web3 metamasek
